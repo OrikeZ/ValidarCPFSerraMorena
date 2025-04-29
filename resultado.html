@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultado CPF</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .caixa {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 650px;
+    }
+    .valido {
+      color: green;
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .invalido {
+      color: red;
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .campo {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .campo label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .campo input {
+      width: calc(100% - 70px);
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .campo button {
+      width: 60px;
+      padding: 8px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+    .campo .copiado {
+      color: green;
+      margin-left: 10px;
+      font-size: 20px;
+      display: none;
+    }
+    .btn-voltar {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #e61111;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .linha {
+      display: flex;
+      justify-content: space-between;
+    }
+    .coluna {
+      width: 48%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="caixa">
+    <div id="mensagemResultado"></div>
+
+    <div id="campos">
+      <div class="linha">
+        <div class="coluna campo">
+          <label>ID</label>
+          <input type="text" id="id" readonly>
+          <button onclick="copiar('id')">Copiar</button>
+          <span id="copiado-id" class="copiado">✅</span>
+        </div>
+        <div class="coluna campo">
+          <label>Primeiro Nome</label>
+          <input type="text" id="primeiroNome" readonly>
+          <button onclick="copiar('primeiroNome')">Copiar</button>
+          <span id="copiado-primeiroNome" class="copiado">✅</span>
+        </div>
+      </div>
+
+      <div class="linha">
+        <div class="coluna campo">
+          <label>Sobrenome</label>
+          <input type="text" id="sobrenome" readonly>
+          <button onclick="copiar('sobrenome')">Copiar</button>
+          <span id="copiado-sobrenome" class="copiado">✅</span>
+        </div>
+        <div class="coluna campo">
+          <label>Telefone</label>
+          <input type="text" id="telefone" readonly>
+          <button onclick="copiar('telefone')">Copiar</button>
+          <span id="copiado-telefone" class="copiado">✅</span>
+        </div>
+      </div>
+
+      <div class="linha">
+        <div class="coluna campo">
+          <label>CPF</label>
+          <input type="text" id="cpf" readonly>
+          <button onclick="copiar('cpf')">Copiar</button>
+          <span id="copiado-cpf" class="copiado">✅</span>
+        </div>
+        <div class="coluna campo">
+          <label>Data de Nascimento</label>
+          <input type="text" id="dataNascimento" readonly>
+          <button onclick="copiar('dataNascimento')">Copiar</button>
+          <span id="copiado-dataNascimento" class="copiado">✅</span>
+        </div>
+      </div>
+
+      <!-- Novo campo "Validade" -->
+      <div class="linha">
+        <div class="coluna campo">
+          <label>Validade</label>
+          <input type="text" id="validade" readonly>
+          <button onclick="copiar('validade')">Copiar</button>
+          <span id="copiado-validade" class="copiado">✅</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-voltar" onclick="voltarInicio()">Voltar</button>
+  </div>
+
+  <script>
+    const cpfValido = localStorage.getItem('cpfValido');
+    const mensagemResultado = document.getElementById('mensagemResultado');
+    const campos = document.getElementById('campos');
+    
+    if (cpfValido === 'true') {
+      mensagemResultado.classList.add('valido');
+      mensagemResultado.textContent = 'CPF Válido!';
+      campos.style.display = 'block';
+
+      const cpfSemMascara = localStorage.getItem('cpfSemMascara');
+      const cpfSemZeros = cpfSemMascara.replace(/^0+/, '');
+      const idValor = cpfSemZeros.substring(0, 8).padEnd(8, '0');
+
+      const nome = localStorage.getItem('nome');
+      const partesNome = nome.trim().split(' ');
+      const primeiroNome = partesNome[0];
+      const sobrenomeCompleto = partesNome.slice(1).join(' ');
+
+      document.getElementById('id').value = idValor;
+      document.getElementById('primeiroNome').value = primeiroNome;
+      document.getElementById('sobrenome').value = sobrenomeCompleto;
+      document.getElementById('cpf').value = cpfSemMascara;
+      document.getElementById('dataNascimento').value = localStorage.getItem('dataNascimento');
+      document.getElementById('telefone').value = localStorage.getItem('telefone');
+      
+      // Calcular a validade (2 dias à frente) e formatar para "dia/mês/ano hora:minuto:segundo"
+      const validade = new Date();
+      validade.setDate(validade.getDate() + 2);
+      
+      const dia = String(validade.getDate()).padStart(2, '0');
+      const mes = String(validade.getMonth() + 1).padStart(2, '0');
+      const ano = validade.getFullYear();
+      const horas = String(validade.getHours()).padStart(2, '0');
+      const minutos = String(validade.getMinutes()).padStart(2, '0');
+      const segundos = String(validade.getSeconds()).padStart(2, '0');
+      
+      const validadeFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
+      document.getElementById('validade').value = validadeFormatada;
+      
+    } else {
+      mensagemResultado.classList.add('invalido');
+      mensagemResultado.textContent = 'CPF Inválido!';
+      campos.style.display = 'none';
+    }
+
+    function copiar(id) {
+      const campo = document.getElementById(id);
+      campo.select();
+      document.execCommand('copy');
+      const icone = document.getElementById('copiado-' + id);
+      icone.style.display = 'inline';
+    }
+
+    function voltarInicio() {
+      // Limpa o localStorage ao voltar
+      localStorage.removeItem('cpfValido');
+      localStorage.removeItem('nome');
+      localStorage.removeItem('telefone');
+      localStorage.removeItem('dataNascimento');
+      localStorage.removeItem('cpfSemMascara');
+      window.location.href = 'index.html';
+    }
+  </script>
+
+</body>
+</html>
