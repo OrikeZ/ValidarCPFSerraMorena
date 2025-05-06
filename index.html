@@ -44,7 +44,7 @@
       font-weight: bold;
     }
 
-    input, button {
+    input {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -52,12 +52,38 @@
       border-radius: 5px;
     }
 
+    /* Estilo do botão Verificar CPF */
     button {
+      width: 100%;
+      padding: 12px 30px;
       background-color: #e61111;
       color: white;
       font-weight: bold;
       margin-top: 20px;
       cursor: pointer;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      background-color: #c41010;
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active {
+      background-color: #bd0f0f;
+      transform: scale(0.98);
+    }
+
+    button:focus {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(230, 17, 17, 0.5); /* Foco suave */
     }
   </style>
 </head>
@@ -128,6 +154,14 @@
 
       localStorage.setItem('cpfSemMascara', cpfLimpo);
       localStorage.setItem('cpfValido', validarCPF(cpfLimpo));
+
+      // Validação do telefone
+      if (telefoneLimpo.length !== 11) {
+        alert('Telefone inválido!');
+        return; // Impede o envio do formulário se o telefone for inválido
+      }
+
+      localStorage.setItem('telefoneValido', 'true');
       localStorage.setItem('nome', nome);
       localStorage.setItem('dataNascimento', dataNascimento);
       localStorage.setItem('telefone', telefoneLimpo);
