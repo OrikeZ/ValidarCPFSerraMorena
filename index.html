@@ -84,6 +84,21 @@
       outline: none;
       box-shadow: 0 0 0 4px rgba(230, 17, 17, 0.5);
     }
+
+    .link-bloqueio {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .link-bloqueio a {
+      color: #e61111;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .link-bloqueio a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -112,6 +127,10 @@
 
     <button type="submit">Verificar CPF</button>
   </form>
+
+  <div class="link-bloqueio">
+    <a href="listadebloqueio.html">Acessar Lista de Bloqueio</a>
+  </div>
 
   <script>
     // Máscara CPF
@@ -150,6 +169,13 @@
 
       const cpfLimpo = cpf.replace(/\D/g, '');
       const telefoneLimpo = telefone.replace(/\D/g, '');
+
+      // Verificar se CPF está bloqueado
+      const listaBloqueio = JSON.parse(localStorage.getItem('cpfsBloqueados') || '[]');
+      if (listaBloqueio.includes(cpfLimpo)) {
+        alert('CPF BLOQUEADO');
+        return;
+      }
 
       // Validação do CPF
       if (!validarCPF(cpfLimpo)) {
