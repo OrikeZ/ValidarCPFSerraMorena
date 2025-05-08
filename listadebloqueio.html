@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Bloqueio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 450px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #e61111;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #c41010;
+      transform: scale(1.02);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    li {
+      background: #eee;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .remove-btn {
+      background: #bd0f0f;
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 10px;
+      transition: background-color 0.3s ease;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .remove-btn:hover {
+      background: #9e0e0e;
+    }
+
+    .link-btn {
+      margin-top: 30px;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+      background-color: #888;
+      padding: 12px 30px;
+      border-radius: 30px;
+      display: inline-block;
+      transition: background-color 0.3s ease;
+    }
+
+    .link-btn:hover {
+      background-color: #666;
+    }
+
+    .action-btns {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    .action-btns button {
+      width: 48%;
+    }
+
+    input[type="file"] {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Lista de CPFs Bloqueados</h1>
+
+  <div class="container">
+    <input type="text" id="cpfBloqueio" placeholder="Digite o CPF para bloquear" maxlength="14">
+    <button onclick="adicionarCPF()">Adicionar à Lista</button>
+
+    <ul id="listaBloqueio"></ul>
+
+    <!-- Botões para exportar e importar -->
+    <div class="action-btns">
+      <button onclick="exportarLista()">Exportar Lista</button>
+      <button onclick="importarLista()">Importar Lista</button>
+    </div>
+
+    <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="handleFileSelect(event)" />
+  </div>
+
+  <a href="index.html" class="link-btn">Voltar</a>
+
+  <script>
+    const lista = document.getElementById('listaBloqueio');
+    const inputCPF = document.getElementById('cpfBloqueio');
+    const fileInput = document.getElementById('fileInput');
+
+    function formatarCPF(cpf) {
+      return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
+    }
+
+    function carregarLista() {
+      lista.innerHTML = '';
+      const bloqueados = JSON.parse(localStorage.getItem('cpfsBloqueados') || '[]');
+      bloqueados.forEach((cpf, index) => {
+        const li = document.createElement('li');
+
+        const span = document.createElement('span');
+        span.textContent = formatarCPF(cpf);
+
+        const btn = document.createElement('button');
+        btn.textContent = 'Remover';
+        btn.className = 'remove-btn';
+        btn.onclick = () => removerCPF(index);
+
+        li.appendChild(span);
+        li.appendChild(btn);
+        lista.appendChild(li);
+      });
+    }
+
+    function adicionarCPF() {
+      let cpf = inputCPF.value.replace(/\D/g, '');
+      if (cpf.length !== 11) {
+        alert('CPF inválido!');
+        return;
+      }
+
+      let lista = JSON.parse(localStorage.getItem('cpfsBloqueados') || '[]');
+      if (!lista.includes(cpf)) {
+        lista.push(cpf);
+        localStorage.setItem('cpfsBloqueados', JSON.stringify(lista));
+        inputCPF.value = '';
+        carregarLista();
+      } else {
+        alert('CPF já está na lista.');
+      }
+    }
+
+    function removerCPF(index) {
+      let lista = JSON.parse(localStorage.getItem('cpfsBloqueados') || '[]');
+      lista.splice(index, 1);
+      localStorage.setItem('cpfsBloqueados', JSON.stringify(lista));
+      carregarLista();
+    }
+
+    function exportarLista() {
+      const bloqueados = JSON.parse(localStorage.getItem('cpfsBloqueados') || '[]');
+      const jsonBlob = new Blob([JSON.stringify(bloqueados, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(jsonBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lista_bloqueio.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importarLista() {
+      fileInput.click();
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (Array.isArray(importedData)) {
+            localStorage.setItem('cpfsBloqueados', JSON.stringify(importedData));
+            carregarLista();
+            alert('Lista importada com sucesso!');
+          } else {
+            alert('Formato inválido de arquivo. O arquivo deve conter uma lista de CPFs.');
+          }
+        } catch (error) {
+          alert('Erro ao importar o arquivo. Certifique-se de que o arquivo está em formato JSON.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    inputCPF.addEventListener('input', function (e) {
+      let v = e.target.value.replace(/\D/g, '');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      e.target.value = v.slice(0, 14);
+    });
+
+    carregarLista();
+  </script>
+
+</body>
+</html>
